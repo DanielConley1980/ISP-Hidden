@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ISP — Individual Support Plan Tool</title>
+<link rel="stylesheet" href="style.css" />
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div id="app">
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 1 — LOGIN
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-login" class="screen active">
+    <div class="page-body center" style="min-height:100vh">
+      <div class="login-card" style="width: 440px">
+        <div class="login-logo">ISP</div>
+        <h1>Individual Support Plans</h1>
+        <p class="sub">Secure, AI-assisted ISP creation and management for your Multi-Academy Trust</p>
+        
+        <div id="login-error" style="display:none;color:#c0392b;background:#fdecea;border:1px solid #f5c6cb;border-radius:6px;padding:10px 14px;margin-bottom:1rem;font-size:13px"></div>
+
+        <div id="g_id_onload"
+          data-client_id="803676045433-p3sduma981d8c4atknvbmun0452m3ce.apps.googleusercontent.com"
+          data-context="signin"
+          data-ux_mode="popup"
+          data-callback="handleGoogleLogin"
+          data-hosted_domain="coopacademies.co.uk"
+          data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin"
+          data-type="standard"
+          data-shape="rectangular"
+          data-theme="outline"
+          data-text="sign_in_with"
+          data-size="large"
+          data-logo_alignment="left"
+          data-width="360">
+        </div>
+        <p class="login-note" style="margin-top:1.25rem">Access is restricted to authorised school staff. Contact your SENDCo administrator if you need access.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 2 — DASHBOARD
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-dashboard" class="screen">
+    <div class="topbar">
+      <div class="topbar-brand">
+        <div class="topbar-logo">ISP</div>
+        <span class="topbar-name">ISP Management</span>
+      </div>
+      <div class="topbar-right">
+        <div class="user-pill">
+          <div class="avatar" id="dash-av">JD</div>
+          <span id="dash-name">Jane Doe</span>
+        </div>
+        <button class="btn-ghost" onclick="doSignOut()">Sign out</button>
+      </div>
+    </div>
+    <div class="page-body wide">
+      <div class="dash-header">
+        <div>
+          <h1>ISP Dashboard</h1>
+          <p id="dash-welcome">Welcome back. Review and edit Individual Support Plans (ISPs) below.</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <button onclick="localStorage.clear();location.reload()" style="background:none;border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px;font-size:12px;color:var(--muted);cursor:pointer" title="Clear local storage and reload">Refresh</button>
+          <button class="btn-primary" onclick="resetForm();showScreen('screen-arbor')">＋ New ISP</button>
+        </div>
+      </div>
+      <div class="stat-row" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card" id="sc-roll" onclick="toggleStatFilter('roll')" title="Show all students on roll" style="background:var(--surface);border-color:var(--border)">
+          <div class="stat-label">Students on roll</div>
+          <div class="stat-value" id="stat-roll" style="color:#555">0</div>
+          <div class="stat-sub">total school roll</div>
+        </div>
+        <div class="stat-card card-green active" id="sc-all" onclick="toggleStatFilter('all')" title="Show active ISPs">
+          <div class="stat-label">Active ISPs</div>
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-sub">active support plans</div>
+        </div>
+        <div class="stat-card card-pink" id="sc-review" onclick="toggleStatFilter('review')" title="Filter: Due for review this term">
+          <div class="stat-label">Due for review</div>
+          <div class="stat-value" id="stat-review">0</div>
+          <div class="stat-sub">not reviewed this term</div>
+        </div>
+        <div class="stat-card card-grey" id="sc-archived" onclick="toggleStatFilter('archived')" title="Filter: Archived plans">
+          <div class="stat-label">Archived plans</div>
+          <div class="stat-value" id="stat-archived">0</div>
+          <div class="stat-sub">closed support plans</div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-card-header">
+          <h2>All plans</h2>
+          <input type="text" id="dash-search" placeholder="Search name, UPN, year, staff…" style="padding:7px 12px;border:1px solid var(--border);border-radius:var(--radius);font-size:13px;width:260px" oninput="applyFilters()" />
+        </div>
+        <table id="isp-table">
+          <thead>
+            <tr id="dash-thead">
+              <th data-col="name"      class="sortable">Student <span class="sort-icon">↕</span></th>
+              <th data-col="year"      class="sortable">Year <span class="sort-icon">↕</span></th>
+              <th data-col="school"    class="sortable">School <span class="sort-icon">↕</span></th>
+              <th data-col="sen"       class="sortable">SEN <span class="sort-icon">↕</span></th>
+              <th data-col="staff"     class="sortable">Staff <span class="sort-icon">↕</span></th>
+              <th data-col="apdrCount" class="sortable" style="text-align:center">APDRs <span class="sort-icon">↕</span></th>
+              <th data-col="lastEdited" class="sortable">Last edited <span class="sort-icon">↕</span></th>
+              <th></th>
+            </tr>
+            <tr id="dash-filter-row">
+              <th></th>
+              <th><select data-col="year" onchange="applyFilters()" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;background:var(--surface)"><option value="">All</option><option>Year 7</option><option>Year 8</option><option>Year 9</option><option>Year 10</option><option>Year 11</option></select></th>
+              <th><input type="text" placeholder="Filter…" data-col="school"  oninput="applyFilters()" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;background:var(--surface)" /></th>
+              <th><select data-col="sen" onchange="applyFilters()" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;background:var(--surface)"><option value="">All</option><option value="K">K</option><option value="K+">K+</option><option value="E">E</option></select></th>
+              <th><input type="text" placeholder="Filter…" data-col="staff"   oninput="applyFilters()" style="width:100%;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;background:var(--surface)" /></th>
+              <th></th>
+              <th></th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="isp-tbody"></tbody>
+        </table>
+        <div id="dash-empty" style="padding:3rem;text-align:center;color:var(--muted);font-size:14px;display:none">No ISPs yet. Create one to get started.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 3 — ARBOR LOOKUP
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-arbor" class="screen">
+    <div class="topbar">
+      <div class="topbar-brand">
+        <div class="topbar-logo">ISP</div>
+        <span class="topbar-name">New ISP — Student Lookup</span>
+      </div>
+      <div class="topbar-right">
+        <div class="user-pill">
+          <div class="avatar" id="arbor-av">JD</div>
+          <span id="arbor-name">Jane Doe</span>
+        </div>
+        <button class="btn-ghost" onclick="showScreen('screen-dashboard')">Cancel</button>
+      </div>
+    </div>
+    <div class="page-body center">
+      <div style="width:100%;max-width:560px">
+        <div style="margin-bottom:1.5rem">
+          <div style="font-size:12px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px">Step 0 of 7</div>
+          <h1 style="font-size:24px;font-weight:700;margin-bottom:6px">Student lookup</h1>
+          <p style="font-size:14px;color:var(--muted)">Search by name to load student data from your MIS sheet, or enter a UPN manually.</p>
+        </div>
+        <div class="lookup-card">
+          <!-- Name search (sheet connected) -->
+          <div id="name-search-section">
+            <div class="field" style="margin-bottom:0;position:relative">
+              <label>Search student name</label>
+              <input type="text" id="student-name-search" placeholder="Start typing a name…" autocomplete="off"
+                oninput="onStudentSearchInput()" style="font-size:15px" />
+              <div id="student-autocomplete" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);z-index:99;box-shadow:0 4px 12px rgba(0,0,0,0.12);max-height:320px;overflow-y:auto"></div>
+            </div>
+            <div style="display:none"><input type="text" id="arbor-id-input" /></div>
+          </div>
+
+          <div id="found-banner" class="found-banner" style="margin-top:1rem"></div>
+          <div id="student-info-card" style="display:none;margin-top:0.75rem"></div>
+
+          <div id="arbor-form-fields" style="display:none">
+            <hr class="divider" />
+            <div class="row-2">
+              <div class="field"><label>First name</label><input type="text" id="f-fname" /></div>
+              <div class="field"><label>Last name</label><input type="text" id="f-lname" /></div>
+            </div>
+            <div class="row-3">
+              <div class="field"><label>Date of birth</label><input type="date" id="f-dob" /></div>
+              <div class="field"><label>Year group</label><input type="text" id="f-year" placeholder="e.g. Year 7" /></div>
+              <div class="field"><label>Form / class</label><input type="text" id="f-form" placeholder="e.g. 7T2" /></div>
+            </div>
+            <div class="row-2">
+              <div class="field"><label>School / site</label><input type="text" id="f-school" placeholder="e.g. Grange Technology College" /></div>
+              <div class="field"><label>Gender</label>
+                <select id="f-gender">
+                  <option value="">Select…</option>
+                  <option>Male</option><option>Female</option><option>Non-binary</option><option>Prefer not to say</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:1rem">
+              <button class="btn-secondary" style="font-size:13px" onclick="['f-fname','f-lname','f-dob','f-year','f-form','f-school'].forEach(id=>{const e=document.getElementById(id);e.readOnly=false;e.style.background='';e.style.color=''});document.getElementById('f-gender').disabled=false">Edit details</button>
+              <button class="btn-primary" onclick="goToISPForm()">Confirm and continue →</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 4 — ISP WIZARD
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-isp" class="screen">
+    <div class="topbar">
+      <div class="topbar-brand">
+        <div class="topbar-logo">ISP</div>
+        <span class="topbar-name" id="isp-topbar-name">New ISP</span>
+      </div>
+      <div class="topbar-right">
+        <div class="user-pill">
+          <div class="avatar" id="isp-av">JD</div>
+          <span id="isp-name-bar">Jane Doe</span>
+        </div>
+        <button class="btn-ghost" onclick="if(confirm('Discard this ISP?'))showScreen('screen-dashboard')">Discard</button>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="form-shell">
+        <div class="form-shell-inner">
+          <div class="form-sidebar" id="form-sidebar"></div>
+          <div class="form-body-wrap">
+            <div class="form-content" id="form-content"></div>
+            <div class="form-footer" id="form-footer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 5 — ISP PREVIEW
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-complete" class="screen">
+    <div class="topbar">
+      <div class="topbar-brand">
+        <div class="topbar-logo">ISP</div>
+        <span class="topbar-name" id="prev-topbar-name">ISP Preview</span>
+      </div>
+      <div class="topbar-right">
+        <div class="user-pill">
+          <div class="avatar" id="comp-av">AJ</div>
+          <span id="comp-name-bar">Miss A Jones</span>
+        </div>
+      </div>
+    </div>
+    <div class="page-body wide">
+      <!-- Action bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px">ISP saved</div>
+          <h1 style="font-size:22px;font-weight:700" id="prev-title">Individual Support Plan</h1>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-primary" id="pdf-btn" onclick="generatePDF()">⬇ Download PDF</button>
+          <button class="btn-secondary" onclick="viewISP(state.previewIdx)">✏ Edit sections</button>
+          <button class="btn-secondary" onclick="showScreen('screen-dashboard');renderDashboard()">← Back to dashboard</button>
+          <button class="btn-secondary" onclick="showScreen('screen-arbor');resetForm()">+ New ISP</button>
+        </div>
+      </div>
+      <!-- Preview content rendered here -->
+      <div id="isp-preview-content"></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 6 — VIEW / APDR
+  ═══════════════════════════════════════════════ -->
+  <div id="screen-view" class="screen">
+    <div class="topbar">
+      <div class="topbar-brand">
+        <div class="topbar-logo">ISP</div>
+        <span class="topbar-name" id="view-topbar-name">View ISP</span>
+      </div>
+      <div class="topbar-right">
+        <div class="user-pill">
+          <div class="avatar" id="view-av">JD</div>
+          <span id="view-name-bar">Jane Doe</span>
+        </div>
+        <button class="btn-ghost" onclick="showScreen('screen-dashboard')">← Dashboard</button>
+      </div>
+    </div>
+    <div class="page-body wide">
+      <div id="view-content"></div>
+    </div>
+  </div>
+
+
+</div>
+
+<!-- ════════════════════════════════════════════
+     JAVASCRIPT
+═══════════════════════════════════════════════ -->
+<script src="access_data.js"></script>
+<script src="mock_generator.js"></script>
+<script src="app.js" defer></script>
+
+<!-- Sheet settings modal -->
+<div id="sheet-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:var(--surface);border-radius:var(--radius-lg);width:min(700px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3)">
+    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+      <h2 style="margin:0;font-size:18px">⚙ Connect student data sheet</h2>
+      <button class="btn-ghost" onclick="closeSheetSettings()">✕ Close</button>
+    </div>
+    <div style="padding:1.5rem">
+
+      <div style="background:var(--blue-light);border:1px solid #B5D4F4;border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.25rem;font-size:13px;color:var(--navy)">
+        <strong>How it works:</strong> You paste a small script into your Google Sheet's Apps Script editor (Extensions → Apps Script). Deploy it once as a web app — no Google Cloud account or sign-in needed. Paste the URL below.
+      </div>
+
+      <details style="margin-bottom:1.25rem">
+        <summary style="cursor:pointer;font-weight:700;font-size:14px;padding:8px 0">📋 Step 1 — Paste this script into your sheet's Apps Script editor</summary>
+        <div style="margin-top:8px;background:#1e1e2e;border-radius:var(--radius);padding:1rem;overflow-x:auto">
+          <pre style="margin:0;font-size:11px;color:#cdd6f4;white-space:pre;font-family:monospace" id="apps-script-code">function doGet(e) {
+  const action = e.parameter.action || 'read';
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // ── WRITE: receive a chunk of ISP data ──────────────────────────
+  if (action === 'chunk') {
+    const props = PropertiesService.getScriptProperties();
+    const id = e.parameter.id;
+    const n  = e.parameter.n;
+    props.setProperty('chunk_' + id + '_' + n, e.parameter.data);
+    props.setProperty('chunk_' + id + '_total', e.parameter.total);
+    return json({ ok: true });
+  }
+
+  // ── WRITE: reassemble chunks and save ISP ───────────────────────
+  if (action === 'commit') {
+    const props = PropertiesService.getScriptProperties();
+    const id    = e.parameter.id;
+    const total = parseInt(props.getProperty('chunk_' + id + '_total') || '0');
+    let assembled = '';
+    for (let i = 0; i < total; i++) {
+      assembled += props.getProperty('chunk_' + id + '_' + i) || '';
+    }
+    // Clean up temp keys
+    for (let i = 0; i < total; i++) props.deleteProperty('chunk_' + id + '_' + i);
+    props.deleteProperty('chunk_' + id + '_total');
+
+    const isp = JSON.parse(assembled);
+
+    let ispSheet = ss.getSheetByName('ISP_Data');
+    if (!ispSheet) {
+      ispSheet = ss.insertSheet('ISP_Data');
+      ispSheet.getRange(1, 1, 1, 6).setValues([['id','arborId','name','level','updated','data']]);
+    }
+    const rows = ispSheet.getDataRange().getValues();
+    const idCol = rows[0].indexOf('id');
+    let rowIdx = -1;
+    for (let i = 1; i < rows.length; i++) {
+      if (String(rows[i][idCol]) === String(isp.id)) { rowIdx = i + 1; break; }
+    }
+    const rowData = [isp.id, isp.arborId||'', isp.name||'', isp.level||'', isp.updated||'', JSON.stringify(isp)];
+    if (rowIdx === -1) ispSheet.appendRow(rowData);
+    else ispSheet.getRange(rowIdx, 1, 1, rowData.length).setValues([rowData]);
+
+    return json({ ok: true, id: isp.id });
+  }
+
+  // ── READ: return students + all saved ISPs ──
+  const studentSheet = ss.getSheets()[0];
+  const [headers, ...rows] = studentSheet.getDataRange().getValues();
+  const students = rows.map(row => {
+    const obj = {};
+    headers.forEach((h, i) => { if (h) obj[String(h).trim()] = row[i]; });
+    return obj;
+  }).filter(s => s['Arbor ID']);
+
+  let isps = [];
+  const ispSheet = ss.getSheetByName('ISP_Data');
+  if (ispSheet && ispSheet.getLastRow() > 1) {
+    const ispRows = ispSheet.getDataRange().getValues();
+    const dataCol = ispRows[0].indexOf('data');
+    if (dataCol > -1) {
+      isps = ispRows.slice(1)
+        .map(r => { try { return JSON.parse(r[dataCol]); } catch(e2) { return null; } })
+        .filter(Boolean);
+    }
+  }
+
+  return json({ students, isps });
+}
+
+function doPost(e) { return doGet(e); }
+
+function json(data) {
+  return ContentService.createTextOutput(JSON.stringify(data))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+        </div>
+        <button class="btn-secondary" style="margin-top:8px;font-size:12px" onclick="navigator.clipboard.writeText(document.getElementById('apps-script-code').textContent).then(()=>alert('Copied!'))">📋 Copy script</button>
+      </details>
+
+      <details style="margin-bottom:1.25rem">
+        <summary style="cursor:pointer;font-weight:700;font-size:14px;padding:8px 0">🚀 Step 2 — Deploy the script as a web app</summary>
+        <ol style="font-size:13px;line-height:2;margin:8px 0 0 16px;color:var(--text)">
+          <li>In the Apps Script editor, click <strong>Deploy → New deployment</strong></li>
+          <li>Click the gear icon next to "Type" and choose <strong>Web app</strong></li>
+          <li>Set <strong>Execute as: Me</strong></li>
+          <li>Set <strong>Who has access: Anyone</strong></li>
+          <li>Click <strong>Deploy</strong> and copy the web app URL</li>
+        </ol>
+      </details>
+
+      <div class="field">
+        <label>Step 3 — Paste the web app URL here</label>
+        <input type="url" id="sheet-url-input" placeholder="https://script.google.com/macros/s/…/exec" style="font-size:13px" />
+      </div>
+
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem">
+        <button id="test-sheet-btn" class="btn-secondary" style="font-size:13px" onclick="testSheetConnection()">✓ Test connection</button>
+        <button class="btn-primary" onclick="saveSheetSettings()">Save and connect</button>
+      </div>
+
+      <div style="margin-top:1rem;padding:10px 14px;background:#FFF8E7;border:1px solid #E8C84A;border-radius:var(--radius);font-size:12px;color:#7A5C00">
+        <strong>Privacy note:</strong> Student data is fetched directly from your sheet into this browser session only. Nothing is sent to any third-party server. ISP data is written back only to your own sheet via the script you control.
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
