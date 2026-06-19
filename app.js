@@ -1284,6 +1284,13 @@ function handleGoogleLogin(response) {
       return;
     }
 
+    // Temporary lockdown while the BigQuery integration is under development
+    const DEV_ALLOWLIST = ['daniel.conley@coopacademies.co.uk', 'logan.mcmillan@coopacademies.co.uk'];
+    if (!DEV_ALLOWLIST.includes(email)) {
+      if (errEl) { errEl.textContent = 'This site is temporarily restricted during development.'; errEl.style.display = 'block'; }
+      return;
+    }
+
     // Store access token for BigQuery calls
     // GSI one-tap returns a credential (id_token), not an access token.
     // We use the OAuth2 implicit flow to also get an access token for BigQuery.
