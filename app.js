@@ -4,7 +4,7 @@
 const API_KEY = 'YOUR_ANTHROPIC_API_KEY_HERE';
 
 /* ── GOOGLE AUTH + BIGQUERY CONFIG ──────────────────────────────────────── */
-const GOOGLE_CLIENT_ID = '803676045433-p3sduma981d8c4atknvbmun0452m3ce.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '803076045433-p3sduma981dl6c4atkvvbmun0452m3se.apps.googleusercontent.com';
 const GCP_PROJECT_ID   = 'coop-trust-data-management';
 const BQ_DATASET       = 'isp_database';
 const BQ_TABLE         = 'isps';
