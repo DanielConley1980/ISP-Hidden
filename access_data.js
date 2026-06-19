@@ -18,7 +18,7 @@ const USER_ACCESS_DB = {
   "claire.bailey@coopacademies.co.uk": ["Grange"],
   "claire.spivey@coopacademies.co.uk": ["Oakwood", "Princeville"],
   "dan.evans@coopacademies.co.uk": ["Grange"],
-  "daniel.conley@coopacademies.co.uk": ["Connell", "Beckfield", "Broadhurst", "Brownhill", "Clarice Cliff", "Friarswood", "Glebe", "Grove", "Hamilton", "Hillside", "Medlock", "New Islington", "Nightingale", "Northwood", "Oakwood", "Parkland", "Penny Oaks", "Portland", "Princeville", "Smithies Moor", "Woodlands", "Woodslee", "Bebington", "Belle Vue", "Failsworth", "Florence MacWilliams", "Grange", "Leeds", "Manchester", "North Manchester", "Priesthorpe", "Stoke-on-Trent", "Swinton", "Walkden", "Brierley", "Delius", "Southfield"],
+  "daniel.conley@coopacademies.co.uk": ["Connell", "Beckfield", "Broadhurst", "Brownhill", "Clarice Cliff", "Friarswood", "Glebe", "Grove", "Hamilton", "Hillside", "Medlock", "New Islington", "Nightingale", "Northwood", "Oakwood", "Parkland", "Penny Oaks", "Portland", "Princeville", "Smithies Moor", "Woodlands", "Woodslee", "Bebington", "Belle Vue", "Failsworth", "Florence MacWilliams", "Grange", "Leeds", "Manchester", "North Manchester", "Priesthorpe", "Stoke-on-Trent", "Swinton", "Walkden", "Brierley", "Delius", "Southfield", "Rathbone"],
   "dave.thorley@coopacademies.co.uk": ["Stoke-on-Trent"],
   "david.hallam@coopacademies.co.uk": ["Leeds"],
   "debbie.jennings@coopacademies.co.uk.removed 19/10/25": ["Hillside"],
